@@ -27,6 +27,7 @@ This program is a Prometheus exporter written in Go that retrieves JSON data fro
 - **Port Configuration**  
   Use the `--port` command-line flag to specify the port on which the server listens (default is `9998`).
 
+![image](./assets/grafana.png)
 
 ## Usage
 
@@ -311,3 +312,9 @@ Stake my Gateway or Mixnode if you like.
 ## TODO
 
 - [ ] Add Mixnode data
+
+## Grafana
+
+![image](./assets/grafana.png)
+
+[Download](https://grafana.com/grafana/dashboards/22828)
