@@ -182,6 +182,20 @@ func metricsHandler(w http.ResponseWriter, r *http.Request) {
 	promhttp.Handler().ServeHTTP(w, r)
 }
 
+func indexHandler(w http.ResponseWriter, r *http.Request) {
+	w.WriteHeader(http.StatusOK)
+	w.Write([]byte(`
+	<html>
+		<body>
+			<h1>Nym Node Exporter</h1>
+			<p>
+				<a href="https://github.com/rluisr/nym-node_exporter">GitHub</a>
+			</p>
+		</body>
+	</html>
+	`))
+}
+
 func main() {
 	// --port フラグを追加（デフォルトは 9998）
 	portPtr := flag.String("port", "9998", "Port to serve metrics on")
@@ -192,6 +206,7 @@ func main() {
 	prometheus.MustRegister(collector)
 
 	// /metrics エンドポイントをカスタムハンドラで公開
+	http.Handle("/", http.HandlerFunc(indexHandler))
 	http.Handle("/metrics", http.HandlerFunc(metricsHandler))
 	log.Println("Prometheus exporter is running on :" + *portPtr + "/metrics")
 	log.Fatal(http.ListenAndServe(":"+*portPtr, nil))
