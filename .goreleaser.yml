@@ -1,6 +1,5 @@
 version: 2
 project_name: nym-node_exporter
-skip_archives: true
 env:
   - GO111MODULE=on
 before:

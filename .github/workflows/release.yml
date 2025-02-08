@@ -70,7 +70,7 @@ jobs:
           file: ./Dockerfile
           platforms: linux/amd64,linux/arm64
           push: true
-          tags: ${{ env.REGISTRY }}/${{ env.IMAGE_NAME}}:${{ github.ref == 'refs/heads/master' && github.sha || github.ref_name }}
+          tags: ${{ env.REGISTRY }}/${{ env.IMAGE_NAME}}:${{ github.ref == 'refs/heads/main' && github.sha || github.ref_name }}
           build-args: |
             BRANCH=${{ github.ref_name }}
             COMMIT=${{ github.sha }}
