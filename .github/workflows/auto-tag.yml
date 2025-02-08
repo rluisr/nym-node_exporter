@@ -1,7 +1,9 @@
 name: Auto.Tag
 
 on:
-  - push
+  push:
+    branches:
+      - main
 
 jobs:
   tag:
