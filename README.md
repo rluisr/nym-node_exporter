@@ -1,6 +1,6 @@
 # Nym Gateway Metrics Prometheus Exporter
 
-This program is a Prometheus exporter written in Go that retrieves JSON data from the Harbourmaster API (https://harbourmaster.nymtech.net/v2/gateways/) for a Nym gateway and exposes it as Prometheus metrics. The JSON data is recursively flattened, and each field is converted into a corresponding Prometheus metric.
+This program is a Prometheus exporter written in Go that retrieves JSON data from the Harbourmaster API (https://harbourmaster.nymtech.net/v2/gateways/) for a Nym gateway and exposes it as Prometheus metrics. 
 
 **Important Notes:**
 - **Gateway Only:** Currently, this exporter supports **gateway** data only.
