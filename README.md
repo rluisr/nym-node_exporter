@@ -50,6 +50,23 @@ This program is a Prometheus exporter written in Go that retrieves JSON data fro
    http://localhost:9998/metrics?identity_key=28tXg9mEW4mifgU1TdetVVAN5PvmhtLpHzFRMfJBT6ND
    ```
 
+3. Scrape config
+
+```
+- job_name: "nym"
+    static_configs:
+      - targets:
+          - 28tXg9mEW4mifgU1TdetVVAN5PvmhtLpHzFRMfJBT6ND # identity key
+    metrics_path: /metrics
+    relabel_configs:
+      - source_labels: [__address__]
+        target_label: __param_identity_key
+      - source_labels: [__param_identity_key]
+        target_label: instance
+      - target_label: __address__
+        replacement: nym-exporter.luis.local # exporter host
+```
+
 ## Metrics Output
 
 ```

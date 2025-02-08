@@ -15,32 +15,25 @@ import (
 	"github.com/prometheus/client_golang/prometheus/promhttp"
 )
 
-// グローバル変数で最新のフラット化済みメトリクスを保持する
 var (
 	mu            sync.RWMutex
 	latestMetrics = make(map[string]interface{})
-	// IdentityKey ごとのキャッシュ
 	cache = make(map[string]CacheEntry)
 )
 
-// キャッシュエントリ。取得したデータと最終更新日時を保持する
 type CacheEntry struct {
 	data        map[string]interface{}
 	lastUpdated time.Time
 }
 
-// JSONCollector は Prometheus のコレクタインターフェースを実装します。
 type JSONCollector struct{}
 
-// Describe はコレクタの説明を行いますが、動的に生成するため何も送信しません。
 func (c *JSONCollector) Describe(ch chan<- *prometheus.Desc) {}
 
-// Collect では、グローバルな latestMetrics から各フィールドを Prometheus メトリクスとして出力します。
 func (c *JSONCollector) Collect(ch chan<- prometheus.Metric) {
 	mu.RLock()
 	defer mu.RUnlock()
 	for key, value := range latestMetrics {
-		// "last_probe_log" のメトリクスは無視する
 		if key == "last_probe_log" {
 			continue
 		}
@@ -72,7 +65,6 @@ func (c *JSONCollector) Collect(ch chan<- prometheus.Metric) {
 	}
 }
 
-// toFloat64 は数値に変換可能な場合 float64 を返します
 func toFloat64(value interface{}) (float64, bool) {
 	switch v := value.(type) {
 	case float64:
@@ -86,14 +78,11 @@ func toFloat64(value interface{}) (float64, bool) {
 	}
 }
 
-// sanitize は Prometheus のメトリクス名として不適切な文字をアンダースコアに置換します
 func sanitize(s string) string {
 	re := regexp.MustCompile(`[^a-zA-Z0-9_]`)
 	return re.ReplaceAllString(s, "_")
 }
 
-// flatten は JSON のネストされた構造を再帰的にフラット化します。
-// 各キーは "_" で連結されます。
 func flatten(prefix string, data interface{}, out map[string]interface{}) {
 	switch v := data.(type) {
 	case map[string]interface{}:
@@ -124,7 +113,6 @@ func flatten(prefix string, data interface{}, out map[string]interface{}) {
 	}
 }
 
-// fetchData は指定した URL から JSON を取得し、フラット化したデータを返します。
 func fetchData(url string) (map[string]interface{}, error) {
 	resp, err := http.Get(url)
 	if err != nil {
@@ -141,9 +129,7 @@ func fetchData(url string) (map[string]interface{}, error) {
 	return out, nil
 }
 
-// metricsHandler は /metrics ハンドラです。
-// リクエストクエリから identity_key を取得し、10 分以上経過していれば再取得、
-// キャッシュ値があればそれを利用し、最新のメトリクスをグローバル変数 latestMetrics に設定します。
+// /metrics Handler
 func metricsHandler(w http.ResponseWriter, r *http.Request) {
 	identityKey := r.URL.Query().Get("identity_key")
 	if identityKey == "" {
@@ -152,7 +138,7 @@ func metricsHandler(w http.ResponseWriter, r *http.Request) {
 	}
 	url := "https://harbourmaster.nymtech.net/v2/gateways/" + identityKey
 
-	// キャッシュの確認（10 分以上経過している場合は再取得）
+	// Check cache (fetch again if more than 10 minutes have passed)
 	mu.Lock()
 	entry, ok := cache[identityKey]
 	needFetch := !ok || time.Since(entry.lastUpdated) > 10*time.Minute
@@ -172,13 +158,11 @@ func metricsHandler(w http.ResponseWriter, r *http.Request) {
 		latestMetrics = newData
 		mu.Unlock()
 	} else {
-		// キャッシュの値を利用
 		mu.Lock()
 		latestMetrics = entry.data
 		mu.Unlock()
 	}
 
-	// promhttp のハンドラでメトリクスを出力
 	promhttp.Handler().ServeHTTP(w, r)
 }
 
@@ -197,15 +181,12 @@ func indexHandler(w http.ResponseWriter, r *http.Request) {
 }
 
 func main() {
-	// --port フラグを追加（デフォルトは 9998）
 	portPtr := flag.String("port", "9998", "Port to serve metrics on")
 	flag.Parse()
 
-	// カスタム・コレクタの登録
 	collector := &JSONCollector{}
 	prometheus.MustRegister(collector)
 
-	// /metrics エンドポイントをカスタムハンドラで公開
 	http.Handle("/", http.HandlerFunc(indexHandler))
 	http.Handle("/metrics", http.HandlerFunc(metricsHandler))
 	log.Println("Prometheus exporter is running on :" + *portPtr + "/metrics")
