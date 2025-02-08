@@ -28,15 +28,6 @@ This program is a Prometheus exporter written in Go that retrieves JSON data fro
   Use the `--port` command-line flag to specify the port on which the server listens (default is `9998`).
 
 
-## Installation
-
-1. Clone the repository or place the source files (e.g., `main.go`) in your project directory.
-2. Execute the following command to download the necessary modules:
-
-   ```sh
-   go mod tidy
-   ```
-
 ## Usage
 
 1. Start the exporter:
