@@ -1,4 +1,6 @@
+version: 2
 project_name: nym-node_exporter
+skip_archives: true
 env:
   - GO111MODULE=on
 before:
@@ -21,15 +23,5 @@ builds:
       - arm64
     goarm:
       - "7"
-archives:
-  - name_template: '{{ .ProjectName }}_{{ .Os }}_{{ .Arch }}{{ if .Arm }}v{{ .Arm }}{{ end }}'
-    replacements:
-      darwin: darwin
-      linux: linux
-      windows: windows
-      amd64: x86_64
-    format_overrides:
-      - goos: windows
-        format: zip
 release:
   prerelease: auto
